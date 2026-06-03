@@ -7,24 +7,33 @@ import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 
-await connectDB();
+const createApp = () => {
+  const app = express();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+  app.use(cors({ origin: process.env.FRONTEND_URL || "https://genzeedev.vercel.app" }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:5173" }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
+  app.use("/api", dataRoutes);
+  app.use("/api", contactRoutes);
 
-app.use("/api", dataRoutes);
-app.use("/api", contactRoutes);
+  return app;
+};
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+let appPromise: Promise<express.Express> | null = null;
 
-export default app;
+const getApp = async () => {
+  if (!appPromise) {
+    appPromise = connectDB().then(() => createApp());
+  }
+  return appPromise;
+};
+
+export default async (req: express.Request, res: express.Response) => {
+  const app = await getApp();
+  return app(req, res);
+};
