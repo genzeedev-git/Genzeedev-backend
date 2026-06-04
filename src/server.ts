@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./config/db.ts";
-import dataRoutes from "./routes/dataRoutes.ts";
-import contactRoutes from "./routes/contactRoutes.ts";
+import connectDB from "./config/db.js";
+import dataRoutes from "./routes/dataRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 
